@@ -1,8 +1,8 @@
 # Sudoku_Game
 
-### Contributors:
-#### -Evans Chen (evansc@andrew.cmu.edu)
-#### -Juan Paniagua (juancpani@gmail.com)
+#### Authors:
+- Evans Chen (evansc@andrew.cmu.edu)
+- Juan Paniagua (juancpani@gmail.com)
  -----
-#### Description
+#### Description:
 Uses backtracking to solve given sudoku boards
