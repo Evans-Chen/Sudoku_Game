@@ -31,7 +31,7 @@ class Positions:
     def remove(self, section, i):
         onBoard = section[0]
         missing = section[1]
-        if i in onBoard:
+        if i not in onBoard:
             raise Invalid
         onBoard.remove(i)
         missing.add(i)
@@ -39,12 +39,16 @@ class Positions:
         # check that section is full
         section[2] = missing == set()
     
-    def removeStep(self, step)
+    def removeStep(self, step):
         i, j = step
         self.remove(self.row, i)
         self.remove(self.col, j)
         self.remove(self.grid, (i // 3) * 3 + (j // 3))
         
+    def validStep(self, step):
+        i, j = step
+        return i in self.row[1] and j in self.col[1]
+    
     def isFull(self):
         return self.row[2] and self.col[2] and self.grid[2]
     
@@ -53,42 +57,59 @@ class Positions:
         return f"rows: %s\ncolumns: %s\nboxes: %s" % s
     
 class ProblemState:   
-    def __init__(self, board: List[List[str]]):
+    def __init__(self, board):
         self.board = board
         try:
-            self.empty, self.positions = createProblemState()
-        except invalid:
+            self.empty, self.positions = self.createProblemState()
+        except Invalid:
             print("This board is invalid")
 
-    def createProblemState():
+    def createProblemState(self):
         empty = deque()
         positions = defaultdict(Positions)
         for i in range(9):
             for j in range(9):
-                val = board[i][j]
+                val = self.board[i][j]
                 if val == '.':
                     empty.append((i, j))
                 else:
                     positions[val].append(i, j)
         return empty, positions
     
-    def isComplete
+    def isComplete(self):
+        return not self.empty
+
+    def getNextStep(self):
+        return self.empty.popleft()
     
+    def getPossibleMoves(self, step):
+        P = self.positions
+        return [position for position in range(9) if P[position].validStep(step)]
+
+    def makeMove(self, step, move):
+        pos = self.positions[move]
+        pos.addStep(step)
+        return self
+
+    def undoMove(self, step, move):
+        pos = self.positions[move]
+        pos.removeStep(step)
+        return self
+
 class Solution:
-    def solveSudoku(self, board: List[List[str]]) -> None:
-        problemState = ProblemState(board)
-        if isComplete(problemState):
-            return None
-        nextStep = getNextStep(problemState)
-        for move in getPossibleMoves(problemState, nextStep):
-            # Sometimes it's easier to make a move, then check if it's valid.
-            # Sometimes it's easier to check if a move is valid first.
-            # Just make sure that you always undo a move properly!
-            if isValid(problemState, nextStep, move):
-                problemState = makeMove(problemState, nextStep, move)
+    def solveSudoku(self, board) -> None:
+        state = ProblemState(board)
+        def solveWithBacktracking(problemState):
+            if problemState.isComplete():
+                return problemState
+            nextStep = problemState.getNextStep()
+            for move in problemState.getPossibleMoves(nextStep):
+                problemState = problemState.makeMove(nextStep, move)
                 tmpSolution = solveWithBacktracking(problemState)
                 if tmpSolution != None:
                     return tmpSolution
-                problemState = undoMove(problemState, nextStep, move)
+                problemState = problemState.undoMove(nextStep, move)
+            return None
+        state = solveWithBacktracking(state)
         return None
         
