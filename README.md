@@ -1,7 +1,8 @@
 # Sudoku_Game
 
-### Contributor: Evans Chen (evansc@andrew.cmu.edu)
-### Contributor: Juan Paniagua (juancpani@gmail.com)
+### Authors:
+- Evans Chen (evansc@andrew.cmu.edu)
+- Juan Paniagua (juancpani@gmail.com)
  -----
 #### Description
 
