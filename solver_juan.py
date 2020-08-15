@@ -6,7 +6,7 @@ class Invalid(Exception):
     pass
 
 class Positions:
-    def __init__(self, val):
+    def __init__(self):
         self.row = [set(), fullSet.copy()]
         self.col = [set(), fullSet.copy()]
         self.grid = [set(), fullSet.copy()]
@@ -50,13 +50,20 @@ class ProblemState:
         except Invalid:
             print("This board is invalid")
 
+    def getBoard(self):
+        return self.board
+    
     def updateBoard(self, move, step, remove = False):
         i, j = step
         self.board[i][j] = '.' if remove else move
             
     def createProblemState(self):
         empty = deque()
-        positions = defaultdict(Positions)
+        positions = dict()
+        
+        for i in range(1, 10):
+            positions[str(i)] = Positions()
+            
         for i in range(9):
             for j in range(9):
                 val = self.board[i][j]
@@ -71,16 +78,17 @@ class ProblemState:
         return not self.empty
 
     def getNextStep(self):
-        return self.empty.popleft()
+        return self.empty[0]
     
     def getPossibleMoves(self, step):
         P = self.positions
-        return [str(position + 1) for position in range(9) if P[position].validStep(step)]
+        return [str(position + 1) for position in range(9) if P[str(position + 1)].validStep(step)]
 
     def makeMove(self, step, move):
         pos = self.positions[move]
         pos.addStep(step)
         self.updateBoard(move, step)
+        self.empty.popleft()
         return self
 
     def undoMove(self, step, move):
@@ -105,5 +113,20 @@ class Solution:
                 problemState = problemState.undoMove(nextStep, move)
             return None
         state = solveWithBacktracking(state)
+        board = state.getBoard()
+        print(board)
         return None
         
+
+test1 = [["5","3",".",".","7",".",".",".","."],
+         ["6",".",".","1","9","5",".",".","."],
+         [".","9","8",".",".",".",".","6","."],
+         ["8",".",".",".","6",".",".",".","3"],
+         ["4",".",".","8",".","3",".",".","1"],
+         ["7",".",".",".","2",".",".",".","6"],
+         [".","6",".",".",".",".","2","8","."],
+         [".",".",".","4","1","9",".",".","5"],
+         [".",".",".",".","8",".",".","7","9"]]
+
+solution = Solution()
+solution.solveSudoku(test1)
