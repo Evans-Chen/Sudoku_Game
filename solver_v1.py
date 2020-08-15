@@ -14,7 +14,6 @@ class Positions:
         self.col.remove(col)
         self.grid.remove((row//3)*3+(col//3))
         
-                    
 class Solution:
     def solveSudoku(self, board): 
         self.positions = [None]*10
@@ -26,9 +25,8 @@ class Solution:
                     self.positions[int(board[row][col])].add(row, col) 
         board = self.solveWithBacktracking(board)
         
-        
     def solveWithBacktracking(self,board):
-        if self.isValidSudoku(board) and self.isComplete(board):
+        if self.isComplete(board):
             return board
         nextStep = self.getNextStep(board)
         for move in ["1","2","3","4","5","6","7","8","9"]:
@@ -42,7 +40,6 @@ class Solution:
                     return tmpSolution
                 board = self.undoMove(board, nextStep, move)
         return None
-        
         
     def isComplete(self, board):
         for row in range(len(board)):
@@ -73,29 +70,3 @@ class Solution:
         self.positions[int(move)].delete(nextStep[0],nextStep[1])
         return board
     
-    
-    def isValidSudoku(self, board):
-        #create 3 hash tables that maps the row/col/sub-grid to sets 
-        
-        rowTable = {}
-        colTable = {}
-        gridTable = {}
-        
-        for i in range(9):
-            rowTable[i] = set()
-            colTable[i] = set()
-            gridTable[i] = set()
-            
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                if (board[row][col] != "."):
-                    val = board[row][col]
-                    if val in rowTable[row]: return False
-                    if val in colTable[col]: return False
-                    if val in gridTable[(row//3)*3+(col//3)]: return False
-                    
-                    rowTable[row].add(val)
-                    colTable[col].add(val)
-                    gridTable[(row//3)*3+(col//3)].add(val)
-                    
-        return True
