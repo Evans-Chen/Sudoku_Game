@@ -9,8 +9,8 @@ red   = (255,   0,   0)
 green = (  0, 255,   0)
 blue  = (  0,   0, 255)
 
-width = 900
-height = 1000
+width = 500
+height = 600
 
 cellx = width/9
 celly = height/10
@@ -20,9 +20,7 @@ pygame.display.set_caption('Sudoku')
 
 running = True
 while running:
-
     screen.fill(white)
-    
     for col in range(10):
         top = [cellx*col,0]
         bottom = [cellx*col,height-celly]
@@ -44,12 +42,10 @@ while running:
             thickness = 1
         pygame.draw.lines(screen, black, True, [left, right], thickness)
 
-
-
+    for event in pygame.event.get():
+        print(event)
+        
     pygame.display.update()
-
-
-
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

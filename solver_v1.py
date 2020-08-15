@@ -1,4 +1,3 @@
-
 class Positions:
     def __init__(self):   
         self.row = set()
@@ -16,18 +15,24 @@ class Positions:
 class Solution:
     def solveSudoku(self, board): 
         self.positions = [None]*10
+        self.emptyCells = []
+        
         for i in range(1,10):
             self.positions[i] = Positions()
         for row in range(len(board)):
             for col in range(len(board[0])):
                 if (board[row][col] != "."):
                     self.positions[int(board[row][col])].add(row, col) 
+                else:
+                    self.emptyCells.append((row,col))
+        
         board = self.solveWithBacktracking(board)
         
+        
     def solveWithBacktracking(self,board):
-        if self.isComplete(board):
+        if self.isComplete():
             return board
-        nextStep = self.getNextStep(board)
+        nextStep = self.emptyCells[0]
         for move in ["1","2","3","4","5","6","7","8","9"]:
             # Sometimes it's easier to make a move, then check if it's valid.
             # Sometimes it's easier to check if a move is valid first.
@@ -40,12 +45,9 @@ class Solution:
                 board = self.undoMove(board, nextStep, move)
         return None
         
-    def isComplete(self, board):
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                if (board[row][col] == "."):
-                    return False
-        return True
+        
+    def isComplete(self):
+        return len(self.emptyCells) == 0
     
     def getNextStep(self, board):
         for row in range(len(board)):
@@ -62,10 +64,12 @@ class Solution:
     def makeMove(self, board, nextStep, move):
         board[nextStep[0]][nextStep[1]] = move
         self.positions[int(move)].add(nextStep[0],nextStep[1])
+        self.emptyCells.pop(0)
         return board
     
     def undoMove(self, board, nextStep, move):
         board[nextStep[0]][nextStep[1]] = "."
         self.positions[int(move)].delete(nextStep[0],nextStep[1])
+        self.emptyCells.insert(0,nextStep)
         return board
     
