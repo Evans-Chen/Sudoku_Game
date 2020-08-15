@@ -1,54 +1,52 @@
 from collections import defaultdict, deque
 
-fullSet = {0, 1, 2, 3, 4, 5, 6, 7, 8}
+fullContraintSet = {0, 1, 2, 3, 4, 5, 6, 7, 8}
 
-class Invalid(Exception):
-    pass
+class Constraint:
+    def __init__(self):
+        self.current = set()
+        self.missing = fullContraintSet.copy()
+
+    def swap(self, i, remove = False):
+        if remove:
+            self.current.remove(i)
+            self.missing.add(i)
+        else:
+            self.missing.remove(i)
+            self.current.add(i)
+
+    def valid(self, i):
+        return i in self.missing
 
 class Positions:
     def __init__(self):
-        self.row = [set(), fullSet.copy()]
-        self.col = [set(), fullSet.copy()]
-        self.grid = [set(), fullSet.copy()]
-    
-    def add(self, section, i):
-        onBoard = section[0]
-        missing = section[1]
-        if i in onBoard: raise Invalid
-        onBoard.add(i)
-        missing.remove(i)
-    
+        self.row = Constraint()
+        self.col = Constraint()
+        self.grid = Constraint()
+        
     def addStep(self, step):
         i, j = step
-        self.add(self.row, i)
-        self.add(self.col, j)
-        self.add(self.grid, (i // 3) * 3 + (j // 3))
+        grid = (i // 3) * 3 + (j // 3)
+        self.row.swap(i)
+        self.col.swap(j)
+        self.grid.swap(grid)
         
-    def remove(self, section, i):
-        onBoard = section[0]
-        missing = section[1]
-        if i not in onBoard: raise Invalid
-        onBoard.remove(i)
-        missing.add(i)
-    
     def removeStep(self, step):
         i, j = step
-        self.remove(self.row, i)
-        self.remove(self.col, j)
-        self.remove(self.grid, (i // 3) * 3 + (j // 3))
+        grid = (i // 3) * 3 + (j // 3)
+        self.row.swap(i, remove = True)
+        self.col.swap(j, remove = True)
+        self.grid.swap(grid, remove = True)       
         
     def validStep(self, step):
         i, j = step
         grid = (i // 3) * 3 + (j // 3)
-        return i in self.row[1] and j in self.col[1] and grid in self.grid[1]
+        return self.row.valid(i) and self.col.valid(j) and self.grid.valid(grid)
     
 class ProblemState:   
     def __init__(self, board):
         self.board = board
-        try:
-            self.empty, self.positions = self.createProblemState()
-        except Invalid:
-            print("This board is invalid")
+        self.empty, self.positions = self.createProblemState()
 
     def getBoard(self):
         return self.board
@@ -68,10 +66,8 @@ class ProblemState:
             for j in range(9):
                 val = self.board[i][j]
                 step = (i, j)
-                if val == '.':
-                    empty.append(step)
-                else:
-                    positions[val].addStep(step)
+                if val == '.': empty.append(step)
+                else: positions[val].addStep(step)
         return empty, positions
     
     def isComplete(self):
@@ -85,15 +81,13 @@ class ProblemState:
         return [str(position + 1) for position in range(9) if P[str(position + 1)].validStep(step)]
 
     def makeMove(self, step, move):
-        pos = self.positions[move]
-        pos.addStep(step)
+        self.positions[move].addStep(step)
         self.updateBoard(move, step)
         self.empty.popleft()
         return self
 
     def undoMove(self, step, move):
-        pos = self.positions[move]
-        pos.removeStep(step)
+        self.positions[move].removeStep(step)
         self.updateBoard(move, step, True)
         self.empty.appendleft(step)
         return self
@@ -114,7 +108,6 @@ class Solution:
             return None
         state = solveWithBacktracking(state)
         board = state.getBoard()
-        print(board)
         return None
         
 
