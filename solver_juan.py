@@ -1,26 +1,22 @@
 from collections import defaultdict, deque
 
-fullSet = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+fullSet = {0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 class Invalid(Exception):
     pass
 
 class Positions:
-    def __init__(self):   
-        self.row = [set(), set(), False]
-        self.col = [set(), set(), False]
-        self.grid = [set(), set(), False]
+    def __init__(self, val):
+        self.row = [set(), fullSet.copy()]
+        self.col = [set(), fullSet.copy()]
+        self.grid = [set(), fullSet.copy()]
     
     def add(self, section, i):
         onBoard = section[0]
         missing = section[1]
-        if i in onBoard:
-            raise Invalid
+        if i in onBoard: raise Invalid
         onBoard.add(i)
         missing.remove(i)
-        
-        # check that section is full
-        section[2] = missing == set()
     
     def addStep(self, step):
         i, j = step
@@ -31,13 +27,9 @@ class Positions:
     def remove(self, section, i):
         onBoard = section[0]
         missing = section[1]
-        if i not in onBoard:
-            raise Invalid
+        if i not in onBoard: raise Invalid
         onBoard.remove(i)
         missing.add(i)
-        
-        # check that section is full
-        section[2] = missing == set()
     
     def removeStep(self, step):
         i, j = step
@@ -47,14 +39,8 @@ class Positions:
         
     def validStep(self, step):
         i, j = step
-        return i in self.row[1] and j in self.col[1]
-    
-    def isFull(self):
-        return self.row[2] and self.col[2] and self.grid[2]
-    
-    def __str__(self):
-        s = (str(self.row), str(self.col), str(self.grid))
-        return f"rows: %s\ncolumns: %s\nboxes: %s" % s
+        grid = (i // 3) * 3 + (j // 3)
+        return i in self.row[1] and j in self.col[1] and grid in self.grid[1]
     
 class ProblemState:   
     def __init__(self, board):
@@ -64,16 +50,21 @@ class ProblemState:
         except Invalid:
             print("This board is invalid")
 
+    def updateBoard(self, move, step, remove = False):
+        i, j = step
+        self.board[i][j] = '.' if remove else move
+            
     def createProblemState(self):
         empty = deque()
         positions = defaultdict(Positions)
         for i in range(9):
             for j in range(9):
                 val = self.board[i][j]
+                step = (i, j)
                 if val == '.':
-                    empty.append((i, j))
+                    empty.append(step)
                 else:
-                    positions[val].append(i, j)
+                    positions[val].addStep(step)
         return empty, positions
     
     def isComplete(self):
@@ -84,16 +75,19 @@ class ProblemState:
     
     def getPossibleMoves(self, step):
         P = self.positions
-        return [position for position in range(9) if P[position].validStep(step)]
+        return [str(position + 1) for position in range(9) if P[position].validStep(step)]
 
     def makeMove(self, step, move):
         pos = self.positions[move]
         pos.addStep(step)
+        self.updateBoard(move, step)
         return self
 
     def undoMove(self, step, move):
         pos = self.positions[move]
         pos.removeStep(step)
+        self.updateBoard(move, step, True)
+        self.empty.appendleft(step)
         return self
 
 class Solution:
