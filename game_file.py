@@ -2,6 +2,10 @@ import pygame, sys
 from pygame.locals import *
 
 pygame.init()
+width = 500
+height = 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Sudoku')
 
 black = (  0,   0,   0)
 white = (255, 255, 255)
@@ -9,14 +13,18 @@ red   = (255,   0,   0)
 green = (  0, 255,   0)
 blue  = (  0,   0, 255)
 
-width = 500
-height = 600
-
 cellx = width/9
 celly = height/10
 
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Sudoku')
+class currentCell:
+    def __init__(self):
+        self.row = -1
+        self.col = -1
+    def update(self, row, col):
+        self.row = row
+        self.col = col 
+
+currentCell = currentCell()
 
 running = True
 while running:
@@ -42,9 +50,21 @@ while running:
             thickness = 1
         pygame.draw.lines(screen, black, True, [left, right], thickness)
 
-    for event in pygame.event.get():
-        print(event)
-        
+    if (currentCell.row > -1 and currentCell.col > -1):
+        pygame.draw.rect(screen, red, (cellx*currentCell.col,celly*currentCell.row,cellx,celly), 4)
+
+    if pygame.mouse.get_pressed()[0]:
+        x = pygame.mouse.get_pos()[0]
+        y = pygame.mouse.get_pos()[1]
+        print("x: ", x)
+        print("y: ", y)
+        currentCell.row = y // int(celly)
+        currentCell.col = x // int(cellx)
+        print("currentCell.row: ", currentCell.row)
+        print("currentCell.col: ", currentCell.col)
+    #for event in pygame.event.get():
+    #    print(event)
+
     pygame.display.update()
 
     for event in pygame.event.get():
