@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 from pygame.locals import *
 
 ##################################################
@@ -12,6 +12,7 @@ height = 600
 #Create the window where the game will be displayed
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Sudoku')
+#clock = pygame.time.Clock()
 
 #Initialize the font
 pygame.font.init()
@@ -42,14 +43,14 @@ class currentCell:
 currentCell = currentCell()
 
 board = [["5","3",".",".","7",".",".",".","."],
-        ["6",".",".","1","9","5",".",".","."],
-        [".","9","8",".",".",".",".","6","."],
-        ["8",".",".",".","6",".",".",".","3"],
-        ["4",".",".","8",".","3",".",".","1"],
-        ["7",".",".",".","2",".",".",".","6"],
-        [".","6",".",".",".",".","2","8","."],
-        [".",".",".","4","1","9",".",".","5"],
-        [".",".",".",".","8",".",".","7","9"]]
+         ["6",".",".","1","9","5",".",".","."],
+         [".","9","8",".",".",".",".","6","."],
+         ["8",".",".",".","6",".",".",".","3"],
+         ["4",".",".","8",".","3",".",".","1"],
+         ["7",".",".",".","2",".",".",".","6"],
+         [".","6",".",".",".",".","2","8","."],
+         [".",".",".","4","1","9",".",".","5"],
+         [".",".",".",".","8",".",".","7","9"]]
 
 for row in range(len(board)):
     for col in range(len(board[0])):
@@ -134,6 +135,22 @@ while running:
         if keys[pygame.K_9]:
             userNumbers[(currentCell.row, currentCell.col)] = "9"
 
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and currentCell.row > 0:
+                print("up")
+                currentCell.row -= 1
+            if event.key == pygame.K_DOWN and currentCell.row < 8:
+                print("down")
+                currentCell.row += 1
+            if event.key == pygame.K_LEFT and currentCell.col > 0:
+                print("left")
+                currentCell.col -= 1
+            if event.key == pygame.K_RIGHT and currentCell.col < 8:
+                print("right")
+                currentCell.col += 1
+
     #Display the user's numbers
     for cell in userNumbers:
         number = myfont.render(userNumbers[cell],True,grey)
@@ -155,6 +172,6 @@ while running:
     #    print(event)
 
     pygame.display.update()
-
+    #clock.tick(60)
 
 
