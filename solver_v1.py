@@ -34,9 +34,6 @@ class Solution:
             return board
         nextStep = self.emptyCells[0]
         for move in ["1","2","3","4","5","6","7","8","9"]:
-            # Sometimes it's easier to make a move, then check if it's valid.
-            # Sometimes it's easier to check if a move is valid first.
-            # Just make sure that you always undo a move properly!
             if self.isValid(board, nextStep, int(move)):
                 board = self.makeMove(board, nextStep, move)
                 tmpSolution = self.solveWithBacktracking(board)
