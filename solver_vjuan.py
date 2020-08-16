@@ -1,47 +1,32 @@
-from collections import defaultdict, deque
-
-fullContraintSet = {0, 1, 2, 3, 4, 5, 6, 7, 8}
-
-class Constraint:
-    def __init__(self):
-        self.current = set()
-        self.missing = fullContraintSet.copy()
-
-    def swap(self, i, remove = False):
-        if remove:
-            self.current.remove(i)
-            self.missing.add(i)
-        else:
-            self.missing.remove(i)
-            self.current.add(i)
-
-    def valid(self, i):
-        return i in self.missing
+from collections import deque
 
 class Positions:
     def __init__(self):
-        self.row = Constraint()
-        self.col = Constraint()
-        self.grid = Constraint()
+        self.row = set()
+        self.col = set()
+        self.grid = set()
         
     def addStep(self, step):
         i, j = step
         grid = (i // 3) * 3 + (j // 3)
-        self.row.swap(i)
-        self.col.swap(j)
-        self.grid.swap(grid)
+        self.row.add(i)
+        self.col.add(j)
+        self.grid.add(grid)
         
     def removeStep(self, step):
         i, j = step
         grid = (i // 3) * 3 + (j // 3)
-        self.row.swap(i, remove = True)
-        self.col.swap(j, remove = True)
-        self.grid.swap(grid, remove = True)       
+        self.row.remove(i)
+        self.col.remove(j)
+        self.grid.remove(grid)       
         
     def validStep(self, step):
         i, j = step
         grid = (i // 3) * 3 + (j // 3)
-        return self.row.valid(i) and self.col.valid(j) and self.grid.valid(grid)
+        if i in self.row: return False
+        if j in self.col: return False
+        if grid in self.grid: return False
+        return True
     
 class ProblemState:   
     def __init__(self, board):
@@ -57,17 +42,14 @@ class ProblemState:
             
     def createProblemState(self):
         empty = deque()
-        positions = dict()
-        
-        for i in range(1, 10):
-            positions[str(i)] = Positions()
+        positions = [Positions() for i in range(9)]
             
         for i in range(9):
             for j in range(9):
                 val = self.board[i][j]
                 step = (i, j)
                 if val == '.': empty.append(step)
-                else: positions[val].addStep(step)
+                else: positions[int(val) - 1].addStep(step)
         return empty, positions
     
     def isComplete(self):
@@ -78,17 +60,17 @@ class ProblemState:
     
     def getPossibleMoves(self, step):
         P = self.positions
-        return [str(position + 1) for position in range(9) if P[str(position + 1)].validStep(step)]
+        return [position for position in range(9) if P[position].validStep(step)]
 
     def makeMove(self, step, move):
         self.positions[move].addStep(step)
-        self.updateBoard(move, step)
+        self.updateBoard(str(move + 1), step)
         self.empty.popleft()
         return self
 
     def undoMove(self, step, move):
         self.positions[move].removeStep(step)
-        self.updateBoard(move, step, True)
+        self.updateBoard(str(move + 1), step, True)
         self.empty.appendleft(step)
         return self
 
@@ -110,16 +92,3 @@ class Solution:
         board = state.getBoard()
         return None
         
-
-test1 = [["5","3",".",".","7",".",".",".","."],
-         ["6",".",".","1","9","5",".",".","."],
-         [".","9","8",".",".",".",".","6","."],
-         ["8",".",".",".","6",".",".",".","3"],
-         ["4",".",".","8",".","3",".",".","1"],
-         ["7",".",".",".","2",".",".",".","6"],
-         [".","6",".",".",".",".","2","8","."],
-         [".",".",".","4","1","9",".",".","5"],
-         [".",".",".",".","8",".",".","7","9"]]
-
-solution = Solution()
-solution.solveSudoku(test1)
