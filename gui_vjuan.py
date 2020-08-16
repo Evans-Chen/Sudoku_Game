@@ -1,19 +1,6 @@
 import pygame as py
-from pygame.locals import (
-    K_0,
-    K_1,
-    K_2,
-    K_3,
-    K_4,
-    K_5,
-    K_6,
-    K_7,
-    K_8,
-    K_9,
-    K_n,
-    MOUSEMOTION,
-    QUIT,
-)
+from pygame.locals import *
+
 # constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600

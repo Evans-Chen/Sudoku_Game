@@ -15,6 +15,8 @@ height = 600
 #Create the window where the game will be displayed
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Sudoku')
+icon = pygame.image.load('sudoku.png')
+pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
 FPS = 120
 
