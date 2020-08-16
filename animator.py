@@ -85,6 +85,8 @@ while True:
         location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
         screen.blit(number, location)
 
+    
+
     pygame.display.update()
 
 class Positions:
@@ -111,7 +113,7 @@ class Solution:
         for row in range(len(board)):
             for col in range(len(board[0])):
                 if board[row][col] != ".":
-                    self.positions[int(board[row][col])].add(row, col) 
+                    self.positions[int(board[row][col])].add(row, col)
                 else:
                     self.emptyCells.append((row, col))
 
@@ -128,7 +130,7 @@ class Solution:
                 if tmpSolution != None:
                     return tmpSolution
                 board = self.undoMove(board, nextStep, move)
-                
+
         return None
 
     def isComplete(self):
