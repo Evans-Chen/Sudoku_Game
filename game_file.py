@@ -136,8 +136,6 @@ while True:
 
     keys = pygame.key.get_pressed()
     if (currentCell.row, currentCell.col) not in originalNumbers:
-        if keys[pygame.K_0]:
-            userNumbers[(currentCell.row, currentCell.col)] = "0"
         if keys[pygame.K_1]:
             userNumbers[(currentCell.row, currentCell.col)] = "1"
         if keys[pygame.K_2]:
@@ -156,7 +154,7 @@ while True:
             userNumbers[(currentCell.row, currentCell.col)] = "8"
         if keys[pygame.K_9]:
             userNumbers[(currentCell.row, currentCell.col)] = "9"
-        if keys[pygame.K_KP_ENTER]:
+        if keys[pygame.K_SPACE]:
             if (currentCell.row, currentCell.col) in userNumbers:
                 if finishedBoard[currentCell.row][currentCell.col] == userNumbers[(currentCell.row, currentCell.col)]:
                     del userNumbers[(currentCell.row, currentCell.col)]
