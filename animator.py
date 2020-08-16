@@ -1,6 +1,7 @@
 import pygame 
 from pygame.locals import *
 import sys 
+import time
 
 ##################################################
 ##########   Initialization   ####################
@@ -95,7 +96,7 @@ class Solution:
                     location.center = (int(col*self.cellx+self.cellx/2), int(row*self.celly+self.celly/2))
                     screen.blit(number, location)
         pygame.display.update()
-        
+
         nextStep = self.emptyCells[0]
         for move in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
             if self.isValid(board, nextStep, int(move)):
@@ -123,12 +124,19 @@ class Solution:
         return True
 
     def makeMove(self, board, nextStep, move):
+        time.sleep(.01)
         board[nextStep[0]][nextStep[1]] = move
         self.positions[int(move)].add(nextStep[0], nextStep[1])
         self.emptyCells.pop(0)
         return board
 
     def undoMove(self, board, nextStep, move):
+        time.sleep(.01)
+        number = myfont.render(move, True, white)
+        location = number.get_rect()
+        location.center = (int(nextStep[1]*self.cellx+self.cellx/2), int(nextStep[0]*self.celly+self.celly/2))
+        screen.blit(number, location)
+        
         board[nextStep[0]][nextStep[1]] = "."
         self.positions[int(move)].delete(nextStep[0], nextStep[1])
         self.emptyCells.insert(0, nextStep)
@@ -138,7 +146,8 @@ class Solution:
 ##########   Main Game Loop   ####################
 ##################################################
 
-while True:
+gameOver = False
+while not gameOver:
     #clock.tick(FPS)
     screen.fill(white)
     for event in pygame.event.get():
@@ -176,10 +185,49 @@ while True:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_p]:
-        print("yes")
+        gameOver = True
         Solution().solveSudoku(board, screen, originalNumbers, cellx, celly)
-    
-    print(board)
-
 
     pygame.display.update()
+
+final = {}
+for row in range(len(board)):
+    for col in range(len(board[0])):
+            final[(row, col)] = board[row][col]
+
+while(gameOver):
+    screen.fill(white)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    for col in range(10):
+        top = [int(cellx*col), 0]
+        bottom = [int(cellx*col), int(height-celly)]
+        if col%3 == 0:
+            thickness = 5
+        else:
+            thickness = 1
+        if col == 9:
+            top[0] -= 1
+            bottom[0] -= 1
+        pygame.draw.lines(screen, black, True, [top, bottom], thickness)
+
+    for row in range(10):
+        left = [0, int(celly*row)]
+        right = [width, int(celly*row)]
+        if row%3 == 0:
+            thickness = 5
+        else:
+            thickness = 1
+        pygame.draw.lines(screen, black, True, [left, right], thickness)
+
+    for cell in final:
+        number = myfont.render(originalNumbers[cell], True, black)
+        location = number.get_rect()
+        location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
+        screen.blit(number, location)
+
+    pygame.display.update()
+
