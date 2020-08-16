@@ -1,5 +1,8 @@
-import pygame, sys, time
+import pygame 
 from pygame.locals import *
+import sys 
+import copy
+from solver_v1 import *
 
 ##################################################
 ##########   Initialization   ####################
@@ -12,7 +15,8 @@ height = 600
 #Create the window where the game will be displayed
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Sudoku')
-#clock = pygame.time.Clock()
+clock = pygame.time.Clock()
+FPS = 120
 
 #Initialize the font
 pygame.font.init()
@@ -29,7 +33,8 @@ grey  = (128, 128, 128)
 cellx = width/9
 celly = height/10
 
-numbers = set([pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9])
+numbers = set([pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+               pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9])
 
 originalNumbers = {}
 userNumbers = {}
@@ -39,6 +44,20 @@ class currentCell:
         self.row = -1
         self.col = -1
         self.active = False
+        self.incorrect = 0
+
+    '''
+        self.movex = 0
+        self.movey = 0
+
+    def control(self, x, y):
+        self.movex += 1
+        self.movey += 1
+    
+    def update(self):
+        self.row += self.movey
+        self.col += self.movex
+    '''
 
 currentCell = currentCell()
 
@@ -52,26 +71,31 @@ board = [["5","3",".",".","7",".",".",".","."],
          [".",".",".","4","1","9",".",".","5"],
          [".",".",".",".","8",".",".","7","9"]]
 
+finishedBoard = copy.deepcopy(board)
+Solution().solveSudoku(finishedBoard)
+print(finishedBoard)
+
 for row in range(len(board)):
     for col in range(len(board[0])):
-        if (board[row][col] != "."):
-            originalNumbers[(row,col)] = board[row][col]
+        if board[row][col] != ".":
+            originalNumbers[(row, col)] = board[row][col]
 
 ##################################################
 ##########   Main Game Loop   ####################
 ##################################################
 
-running = True
-while running:
+while True:
+    #clock.tick(FPS)
+    screen.fill(white)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            pygame.quit()
+            sys.exit()
 
-    screen.fill(white)
     for col in range(10):
-        top = [int(cellx*col),0]
-        bottom = [int(cellx*col),int(height-celly)]
-        if col%3==0:
+        top = [int(cellx*col), 0]
+        bottom = [int(cellx*col), int(height-celly)]
+        if col%3 == 0:
             thickness = 5
         else:
             thickness = 1
@@ -83,27 +107,25 @@ while running:
     for row in range(10):
         left = [0, int(celly*row)]
         right = [width, int(celly*row)]
-        if row%3==0:
+        if row%3 == 0:
             thickness = 5
         else:
             thickness = 1
         pygame.draw.lines(screen, black, True, [left, right], thickness)
 
-    if (currentCell.active):
-        pygame.draw.rect(screen, red, (int(cellx*currentCell.col),int(celly*currentCell.row),int(cellx),int(celly)), 5)
+    if currentCell.active:
+        pygame.draw.rect(screen, red, (int(cellx*currentCell.col),
+                                       int(celly*currentCell.row), int(cellx), int(celly)), 5)
 
     #pygame.mouse.get_pressed() -> (button1, button2, button3) these are all bools
     if pygame.mouse.get_pressed()[0]:
-        x = pygame.mouse.get_pos()[0]
-        y = pygame.mouse.get_pos()[1]
-        #print("x: ", x)
-        #print("y: ", y)
-        currentCell.row = y // int(celly)
-        currentCell.col = x // int(cellx)
+        x = pygame.mouse.get_pos()[0] // int(cellx)
+        y = pygame.mouse.get_pos()[1] // int(celly)
+        if 0 <= x < 9 and 0 <= y < 9:
+            currentCell.row = y
+            currentCell.col = x
         currentCell.active = True
-        #print("currentCell.row: ", currentCell.row)
-        #print("currentCell.col: ", currentCell.col)
-    
+
     '''
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -134,6 +156,14 @@ while running:
             userNumbers[(currentCell.row, currentCell.col)] = "8"
         if keys[pygame.K_9]:
             userNumbers[(currentCell.row, currentCell.col)] = "9"
+        if keys[pygame.K_KP_ENTER]:
+            if (currentCell.row, currentCell.col) in userNumbers:
+                if finishedBoard[currentCell.row][currentCell.col] == userNumbers[(currentCell.row, currentCell.col)]:
+                    del userNumbers[(currentCell.row, currentCell.col)]
+                    originalNumbers[(currentCell.row, currentCell.col)] = finishedBoard[currentCell.row][currentCell.col]
+                else:
+                    currentCell.incorrect += 1
+                    del userNumbers[(currentCell.row, currentCell.col)]
 
     events = pygame.event.get()
     for event in events:
@@ -150,28 +180,42 @@ while running:
             if event.key == pygame.K_RIGHT and currentCell.col < 8:
                 print("right")
                 currentCell.col += 1
+    '''
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP and currentCell.row > 0:
+                print("up")
+                currentCell.control(0, 1)
+            if event.key == pygame.K_DOWN and currentCell.row < 8:
+                print("down")
+                currentCell.control(0, -1)
+            if event.key == pygame.K_LEFT and currentCell.col > 0:
+                print("left")
+                currentCell.control(1, 0)
+            if event.key == pygame.K_RIGHT and currentCell.col < 8:
+                print("right")
+                currentCell.control(-1, 0)
+    currentCell.update()    
+    '''
 
     #Display the user's numbers
     for cell in userNumbers:
-        number = myfont.render(userNumbers[cell],True,grey)
+        number = myfont.render(userNumbers[cell], True, grey)
         location = number.get_rect()
         location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
-        #print("cell: ", cell)
-        #print("x: ", int(cell[1]*col))
-        #print("y: ", int(cell[0]*row))
-        screen.blit(number, location) 
-    
+        screen.blit(number, location)
+
     #Displays the original numbers
     for cell in originalNumbers:
-        number = myfont.render(originalNumbers[cell],True,black)
+        number = myfont.render(originalNumbers[cell], True, black)
         location = number.get_rect()
         location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
-        screen.blit(number, location) 
+        screen.blit(number, location)
 
-    #for event in pygame.event.get():
-    #    print(event)
+    #Display the number of incorrect attempts
+    for i in range(currentCell.incorrect):
+        X = myfont.render("X", True, red)
+        location = number.get_rect()
+        location.center = (int(i*cellx+cellx/2), int(9*celly+celly/2))
+        screen.blit(X, location)
 
     pygame.display.update()
-    #clock.tick(60)
-
-
