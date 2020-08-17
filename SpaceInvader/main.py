@@ -34,12 +34,12 @@ moving_right = False
 player_location = [50, 50]
 player_y_momentum = 0
 
-player_rect = pygame.rect(player_location[0], player_location[1], player_image.get_width(), player_image.get_height())
-
+player_rect = pygame.Rect(player_location[0], player_location[1], player_image.get_width(), player_image.get_height())
+test_rect = pygame.Rect(100, 100, 100, 50)
 
 running = True
 while running:
-    screen.fill((0, 0, 0))
+    screen.fill((146, 244, 255))
     player(player_location)
 
     # Momentum
@@ -56,8 +56,15 @@ while running:
         player_location[0] += 4
 
     player_rect.x = player_location[0]
-    player_rect_y = player_location[1]
-    
+    player_rect.y = player_location[1]
+
+    if player_rect.colliderect(test_rect):
+        pygame.draw.rect(screen, (255, 0, 0), test_rect)
+        pygame.draw.rect(screen, (255, 0, 0), player_rect)
+
+    else:
+        pygame.draw.rect(screen, (0, 0, 0), test_rect)
+
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
