@@ -35,7 +35,7 @@ player_location = [50, 50]
 player_y_momentum = 0
 
 player_rect = pygame.Rect(player_location[0], player_location[1], player_image.get_width(), player_image.get_height())
-test_rect = pygame.Rect(100, 100, 100, 50)
+test_rect = pygame.Rect(0, 200, 200, 50)
 
 running = True
 while running:
@@ -60,10 +60,10 @@ while running:
 
     if player_rect.colliderect(test_rect):
         pygame.draw.rect(screen, (255, 0, 0), test_rect)
-        pygame.draw.rect(screen, (255, 0, 0), player_rect)
-
+        player_y_momentum = -player_y_momentum
     else:
         pygame.draw.rect(screen, (0, 0, 0), test_rect)
+    player_location[1] += player_y_momentum
 
     for event in pygame.event.get():
         if event.type == QUIT:
