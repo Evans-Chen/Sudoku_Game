@@ -19,6 +19,7 @@ pygame.display.set_caption('Sudoku')
 #Initialize the font
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
+erase = pygame.font.SysFont('Comic Sans MS', 35)
 
 #Initialize some colors
 black = (  0,   0,   0)
@@ -72,6 +73,7 @@ class Solution:
         self.og = originalNumbers
         self.cellx = cellx
         self.celly = celly
+        self.cellsToDraw = {}
         
         for i in range(1, 10):
             self.positions[i] = Positions()
@@ -88,13 +90,7 @@ class Solution:
         if self.isComplete():
             return board
 
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                if board[row][col] != "." and (row, col) not in self.og:
-                    number = myfont.render(board[row][col], True, red)
-                    location = number.get_rect()
-                    location.center = (int(col*self.cellx+self.cellx/2), int(row*self.celly+self.celly/2))
-                    screen.blit(number, location)
+        self.drawBoard(self.screen)
         pygame.display.update()
 
         nextStep = self.emptyCells[0]
@@ -124,110 +120,72 @@ class Solution:
         return True
 
     def makeMove(self, board, nextStep, move):
-        time.sleep(.01)
+        #time.sleep(.01)
+        self.cellsToDraw[nextStep] = move
+
         board[nextStep[0]][nextStep[1]] = move
         self.positions[int(move)].add(nextStep[0], nextStep[1])
         self.emptyCells.pop(0)
         return board
 
     def undoMove(self, board, nextStep, move):
-        time.sleep(.01)
-        number = myfont.render(move, True, white)
-        location = number.get_rect()
-        location.center = (int(nextStep[1]*self.cellx+self.cellx/2), int(nextStep[0]*self.celly+self.celly/2))
-        screen.blit(number, location)
-        
+        #time.sleep(.01)
+        self.cellsToDraw.pop(nextStep)
+
         board[nextStep[0]][nextStep[1]] = "."
         self.positions[int(move)].delete(nextStep[0], nextStep[1])
         self.emptyCells.insert(0, nextStep)
         return board
 
+    def drawBoard(self, screen):
+        screen.fill(white)
+        for col in range(10):
+            top = [int(cellx*col), 0]
+            bottom = [int(cellx*col), int(height-celly)]
+            if col%3 == 0:
+                thickness = 5
+            else:
+                thickness = 1
+            if col == 9:
+                top[0] -= 1
+                bottom[0] -= 1
+            pygame.draw.lines(screen, black, True, [top, bottom], thickness)
+
+        for row in range(10):
+            left = [0, int(celly*row)]
+            right = [width, int(celly*row)]
+            if row%3 == 0:
+                thickness = 5
+            else:
+                thickness = 1
+            pygame.draw.lines(screen, black, True, [left, right], thickness)
+
+        #Displays the original numbers
+        for cell in originalNumbers:
+            number = myfont.render(originalNumbers[cell], True, black)
+            location = number.get_rect()
+            location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
+            screen.blit(number, location)
+
+        for cell in self.cellsToDraw:
+            number = myfont.render(self.cellsToDraw[cell], True, red)
+            location = number.get_rect()
+            location.center = (int(cell[1]*self.cellx+self.cellx/2), int(cell[0]*self.celly+self.celly/2))
+            screen.blit(number, location)
+
 ##################################################
 ##########   Main Game Loop   ####################
 ##################################################
 
-gameOver = False
-while not gameOver:
+while True:
     #clock.tick(FPS)
-    screen.fill(white)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-    for col in range(10):
-        top = [int(cellx*col), 0]
-        bottom = [int(cellx*col), int(height-celly)]
-        if col%3 == 0:
-            thickness = 5
-        else:
-            thickness = 1
-        if col == 9:
-            top[0] -= 1
-            bottom[0] -= 1
-        pygame.draw.lines(screen, black, True, [top, bottom], thickness)
-
-    for row in range(10):
-        left = [0, int(celly*row)]
-        right = [width, int(celly*row)]
-        if row%3 == 0:
-            thickness = 5
-        else:
-            thickness = 1
-        pygame.draw.lines(screen, black, True, [left, right], thickness)
-
-    #Displays the original numbers
-    for cell in originalNumbers:
-        number = myfont.render(originalNumbers[cell], True, black)
-        location = number.get_rect()
-        location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
-        screen.blit(number, location)
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_p]:
-        gameOver = True
-        Solution().solveSudoku(board, screen, originalNumbers, cellx, celly)
+    Solution().solveSudoku(board, screen, originalNumbers, cellx, celly)
+    
 
     pygame.display.update()
-
-final = {}
-for row in range(len(board)):
-    for col in range(len(board[0])):
-            final[(row, col)] = board[row][col]
-
-while(gameOver):
-    screen.fill(white)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    for col in range(10):
-        top = [int(cellx*col), 0]
-        bottom = [int(cellx*col), int(height-celly)]
-        if col%3 == 0:
-            thickness = 5
-        else:
-            thickness = 1
-        if col == 9:
-            top[0] -= 1
-            bottom[0] -= 1
-        pygame.draw.lines(screen, black, True, [top, bottom], thickness)
-
-    for row in range(10):
-        left = [0, int(celly*row)]
-        right = [width, int(celly*row)]
-        if row%3 == 0:
-            thickness = 5
-        else:
-            thickness = 1
-        pygame.draw.lines(screen, black, True, [left, right], thickness)
-
-    for cell in final:
-        number = myfont.render(originalNumbers[cell], True, black)
-        location = number.get_rect()
-        location.center = (int(cell[1]*cellx+cellx/2), int(cell[0]*celly+celly/2))
-        screen.blit(number, location)
-
-    pygame.display.update()
-
