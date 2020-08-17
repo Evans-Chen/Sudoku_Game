@@ -30,8 +30,12 @@ def player(location):
 
 moving_left = False
 moving_right = False
+
 player_location = [50, 50]
 player_y_momentum = 0
+
+player_rect = pygame.rect(player_location[0], player_location[1], player_image.get_width(), player_image.get_height())
+
 
 running = True
 while running:
@@ -51,6 +55,9 @@ while running:
     if moving_right:
         player_location[0] += 4
 
+    player_rect.x = player_location[0]
+    player_rect_y = player_location[1]
+    
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
